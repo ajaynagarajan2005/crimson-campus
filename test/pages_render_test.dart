@@ -47,7 +47,7 @@ void main() {
 
   for (final entry in sizes.entries) {
     group(entry.key, () {
-      final routes = [...AppRoutes.routes.keys, AppRoutes.eventDetail, AppRoutes.shuttleRoute];
+      final routes = [...AppRoutes.routes.keys, AppRoutes.eventDetail, AppRoutes.shuttleRoute, AppRoutes.ticketDetail];
       for (final route in routes) {
         testWidgets('renders $route', (tester) async {
           sizeView(tester, entry.value);
@@ -170,7 +170,44 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(api.tickets.single.message, 'Cannot connect to campus Wi-Fi');
+    // Raising a ticket opens its details.
+    expect(find.text('Your message'), findsOneWidget);
+    expect(find.text('Ticket submitted'), findsOneWidget);
+    expect(find.text('Cannot connect to campus Wi-Fi'), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     expect(find.text('My tickets (1)'), findsOneWidget);
+  });
+
+  testWidgets('ticket history filters, searches and opens a ticket', (tester) async {
+    sizeView(tester, const Size(390, 844));
+    final state = AppState.instance;
+    await state.raiseTicket('Hostel', 'Air conditioner in room B-12 is leaking water');
+    await state.raiseTicket('Fees', 'Hostel fee shows twice on my statement');
+    await state.raiseTicket('IT & Wi-Fi', 'Library printer does not accept my card');
+
+    await tester.pumpWidget(appAt(AppRoutes.helpdesk));
+    await tester.pumpAndSettle();
+    // Helpdesk shows the latest three and links to the full history.
+    expect(find.text('My tickets (3)'), findsOneWidget);
+    final viewAll = find.text('View all');
+    await tester.scrollUntilVisible(viewAll.hitTestable(), 200, scrollable: find.byType(Scrollable).first);
+    await tester.tap(viewAll);
+    await tester.pumpAndSettle();
+    expect(find.text('Ticket history'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'printer');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Library printer'), findsOneWidget);
+    expect(find.textContaining('Air conditioner'), findsNothing);
+
+    await tester.tap(find.textContaining('Library printer'));
+    await tester.pumpAndSettle();
+    expect(find.text('Your message'), findsOneWidget);
+    expect(find.text('Library printer does not accept my card'), findsOneWidget);
+    expect(find.text('IT & Wi-Fi'), findsWidgets);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('photo upload shows on the virtual ID', (tester) async {

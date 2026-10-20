@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../models/student.dart';
+import '../routes.dart';
 import '../state/app_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/glass_container.dart';
 import '../widgets/glass_page.dart';
+import 'ticket_screens.dart';
 
 class HelpdeskScreen extends StatefulWidget {
   const HelpdeskScreen({super.key});
@@ -48,7 +50,10 @@ class _HelpdeskScreenState extends State<HelpdeskScreen> {
     );
     if (!mounted) return;
     setState(() => _submitting = false);
-    if (ticket != null) _controller.clear();
+    if (ticket != null) {
+      _controller.clear();
+      Navigator.pushNamed(context, AppRoutes.ticketDetail, arguments: ticket);
+    }
   }
 
   @override
@@ -155,8 +160,17 @@ class _HelpdeskScreenState extends State<HelpdeskScreen> {
                 SectionHeader(
                   title: 'My tickets (${tickets.length})',
                   icon: Icons.inbox_rounded,
+                  actionLabel: 'View all',
+                  onAction: () => Navigator.pushNamed(context, AppRoutes.ticketHistory),
                 ),
-                for (final ticket in tickets) _TicketTile(ticket: ticket),
+                for (final ticket in tickets.take(3)) TicketTile(ticket: ticket),
+                if (tickets.length > 3)
+                  TextButton.icon(
+                    onPressed: () => Navigator.pushNamed(context, AppRoutes.ticketHistory),
+                    style: TextButton.styleFrom(foregroundColor: context.accentInk, minimumSize: const Size(48, 48)),
+                    icon: const Icon(Icons.history_rounded),
+                    label: Text('See all ${tickets.length} tickets'),
+                  ),
               ],
             );
           },
@@ -218,32 +232,3 @@ class _ContactTile extends StatelessWidget {
   }
 }
 
-class _TicketTile extends StatelessWidget {
-  const _TicketTile({required this.ticket});
-
-  final HelpdeskTicket ticket;
-
-  @override
-  Widget build(BuildContext context) {
-    return GlassContainer(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text(ticket.ticketNo, style: AppText.title)),
-              StatusBadge(label: ticket.status, tone: BadgeTone.warning, dense: true),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(ticket.message, style: AppText.body, maxLines: 3, overflow: TextOverflow.ellipsis),
-          MetaLine(
-            icon: Icons.schedule_rounded,
-            text: '${ticket.category} · raised ${ticket.createdAt} UTC',
-          ),
-        ],
-      ),
-    );
-  }
-}

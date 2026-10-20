@@ -50,3 +50,26 @@ String greetingFor(DateTime now) {
   if (now.hour < 17) return 'Good afternoon';
   return 'Good evening';
 }
+
+/// Parses a server timestamp ("YYYY-MM-DD HH:MM:SS", UTC) into local time.
+DateTime? parseUtcTimestamp(String value) {
+  final parsed = DateTime.tryParse('${value.trim().replaceFirst(' ', 'T')}Z');
+  return parsed?.toLocal();
+}
+
+const List<String> _monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/// "Tue, 21 Oct 2026 · 3:40 PM" in the device's time zone.
+String formatLocalDateTime(DateTime t) =>
+    '${weekdayShort[t.weekday]}, ${t.day} ${_monthsShort[t.month - 1]} ${t.year} · '
+    '${formatTime(TimeOfDay(hour: t.hour, minute: t.minute))}';
+
+/// "just now", "5 min ago", "3 h ago", "2 days ago" or a date.
+String formatTimeAgo(DateTime t, [DateTime? now]) {
+  final diff = (now ?? DateTime.now()).difference(t);
+  if (diff.inMinutes < 1) return 'just now';
+  if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
+  if (diff.inHours < 24) return '${diff.inHours} h ago';
+  if (diff.inDays < 7) return diff.inDays == 1 ? 'yesterday' : '${diff.inDays} days ago';
+  return '${t.day} ${_monthsShort[t.month - 1]} ${t.year}';
+}

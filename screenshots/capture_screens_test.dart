@@ -218,6 +218,12 @@ void main() {
   shot('18_event_details', AppRoutes.eventDetail);
 
   shot('19_shuttle_route', AppRoutes.shuttleRoute);
+  shot('20_ticket_history', AppRoutes.ticketHistory, before: (t) async {
+    await AppState.instance.raiseTicket('Hostel', 'Air conditioner in room C-12 is leaking water onto the desk.');
+  });
+  shot('21_ticket_detail', AppRoutes.ticketHistory, before: (t) async {
+    await t.tap(find.textContaining('HD-').first);
+  });
 
   // ---- New landing sections, login pages in light mode ----
   group('sections', () {

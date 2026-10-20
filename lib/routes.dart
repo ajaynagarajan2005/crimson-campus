@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'data/sample_data.dart';
+import 'models/student.dart';
 import 'screens/announcements_screen.dart';
 import 'screens/attendance_screen.dart';
 import 'screens/campus_map_screen.dart';
@@ -16,6 +17,7 @@ import 'screens/register_screen.dart';
 import 'screens/results_screen.dart';
 import 'screens/shuttle_route_screen.dart';
 import 'screens/shuttle_screen.dart';
+import 'screens/ticket_screens.dart';
 import 'screens/timetable_screen.dart';
 import 'state/app_state.dart';
 
@@ -39,6 +41,8 @@ class AppRoutes {
   static const String eventDetail = '/event';
   static const String campusMap = '/campus-map';
   static const String shuttleRoute = '/shuttle/route';
+  static const String ticketHistory = '/helpdesk/tickets';
+  static const String ticketDetail = '/helpdesk/ticket';
 
   static Map<String, WidgetBuilder> get routes => {
         landing: (_) => const LandingScreen(),
@@ -55,6 +59,7 @@ class AppRoutes {
         shuttle: _requireLogin((_) => const ShuttleScreen()),
         clubs: _requireLogin((_) => const ClubsScreen()),
         helpdesk: _requireLogin((_) => const HelpdeskScreen()),
+        ticketHistory: _requireLogin((_) => const TicketHistoryScreen()),
         announcements: _requireLogin((_) => const AnnouncementsScreen()),
       };
 
@@ -71,6 +76,13 @@ class AppRoutes {
       return MaterialPageRoute<void>(
         settings: settings,
         builder: _requireLogin((_) => EventDetailScreen(event: event)),
+      );
+    }
+    if (settings.name == ticketDetail) {
+      final ticket = settings.arguments is HelpdeskTicket ? settings.arguments! as HelpdeskTicket : null;
+      return MaterialPageRoute<void>(
+        settings: settings,
+        builder: _requireLogin((_) => TicketDetailScreen(ticket: ticket)),
       );
     }
     if (settings.name == shuttleRoute) {
