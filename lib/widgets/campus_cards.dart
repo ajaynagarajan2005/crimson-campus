@@ -76,19 +76,18 @@ class AnnouncementCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
+              color: context.faint,
               borderRadius: BorderRadius.circular(AppRadius.chip),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+              border: Border.all(color: context.hairline),
             ),
             child: Row(
               children: [
-                const Icon(Icons.alarm_rounded, size: 18, color: Colors.white),
+                Icon(Icons.alarm_rounded, size: 18, color: context.accentInk),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     announcement.deadline,
                     style: const TextStyle(
-                      color: Colors.white,
                       fontWeight: FontWeight.w600,
                       fontSize: 13.5,
                     ),

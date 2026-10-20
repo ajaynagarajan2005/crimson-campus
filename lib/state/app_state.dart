@@ -33,7 +33,7 @@ class AppState {
       ValueNotifier<List<HelpdeskTicket>>(const []);
 
   /// Light / dark look for the landing page and campus map.
-  final ValueNotifier<ThemeMode> themeMode = ValueNotifier<ThemeMode>(ThemeMode.dark);
+  final ValueNotifier<ThemeMode> themeMode = ValueNotifier<ThemeMode>(ThemeMode.light);
 
   void toggleTheme() {
     themeMode.value = themeMode.value == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;

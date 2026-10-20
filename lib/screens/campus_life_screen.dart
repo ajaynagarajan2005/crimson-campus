@@ -48,7 +48,7 @@ class _CampusLifeScreenState extends State<CampusLifeScreen> {
                   ),
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: Colors.white),
+              Icon(Icons.chevron_right_rounded, color: context.accentInk),
             ],
           ),
         ),
@@ -132,7 +132,7 @@ class _Segment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : Colors.white;
+    final color = selected ? context.selectedFg : context.ink;
     return Expanded(
       child: Semantics(
         selected: selected,
@@ -147,7 +147,7 @@ class _Segment extends StatelessWidget {
               height: 46,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected ? Colors.white : Colors.transparent,
+                color: selected ? context.selectedBg : Colors.transparent,
                 borderRadius: BorderRadius.circular(AppRadius.pill),
               ),
               child: Row(

@@ -39,7 +39,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       children: [
         TextField(
           onChanged: (value) => setState(() => _query = value),
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: context.ink),
           decoration: const InputDecoration(
             hintText: 'Search your borrowed books',
             prefixIcon: Icon(Icons.search_rounded),
@@ -69,7 +69,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               const SizedBox(height: 14),
               const GlassProgressBar(value: 42 / 120),
               const SizedBox(height: 6),
-              Text('42 of 120 seats free right now', style: AppText.caption.copyWith(color: Colors.white)),
+              Text('42 of 120 seats free right now', style: AppText.caption.copyWith(color: context.ink)),
             ],
           ),
         ),
@@ -130,8 +130,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                             success: (_) => 'Renewed "${book.title}" for 14 days',
                           ),
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    disabledForegroundColor: AppColors.muted,
+                    foregroundColor: context.accentInk,
+                    disabledForegroundColor: context.inkMuted,
                     minimumSize: const Size(64, 48),
                   ),
                   child: Text(renewed.contains(book.id) ? 'Done' : 'Renew'),

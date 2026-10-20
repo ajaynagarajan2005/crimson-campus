@@ -95,7 +95,7 @@ class ShuttleScreen extends StatelessWidget {
                 ),
                 IconButton(
                   tooltip: alerts.contains(route.id) ? 'Turn off alerts' : 'Alert me before it leaves',
-                  color: Colors.white,
+                  color: context.accentInk,
                   icon: Icon(
                     alerts.contains(route.id)
                         ? Icons.notifications_active_rounded
@@ -103,7 +103,7 @@ class ShuttleScreen extends StatelessWidget {
                   ),
                   onPressed: () => _toggleAlert(context, route),
                 ),
-                const Icon(Icons.chevron_right_rounded, color: Colors.white),
+                Icon(Icons.chevron_right_rounded, color: context.accentInk),
               ],
             ),
           ),
@@ -132,7 +132,7 @@ class _StopsTimeline extends StatelessWidget {
                     Expanded(
                       child: Container(
                         height: 3,
-                        color: i == 0 ? Colors.transparent : Colors.white.withValues(alpha: 0.5),
+                        color: i == 0 ? Colors.transparent : context.hairline,
                       ),
                     ),
                     Container(
@@ -140,8 +140,8 @@ class _StopsTimeline extends StatelessWidget {
                       height: 14,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: i == 0 ? Colors.white : AppColors.primary,
-                        border: Border.all(color: Colors.white, width: 2.5),
+                        color: i == 0 ? context.selectedBg : (context.isLight ? Colors.white : AppColors.primary),
+                        border: Border.all(color: context.isLight ? AppColors.primary : Colors.white, width: 2.5),
                       ),
                     ),
                     Expanded(
@@ -149,7 +149,7 @@ class _StopsTimeline extends StatelessWidget {
                         height: 3,
                         color: i == stops.length - 1
                             ? Colors.transparent
-                            : Colors.white.withValues(alpha: 0.5),
+                            : context.hairline,
                       ),
                     ),
                   ],

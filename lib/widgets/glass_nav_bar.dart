@@ -68,7 +68,7 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : Colors.white;
+    final color = selected ? context.selectedFg : context.ink;
     return Semantics(
       selected: selected,
       button: true,
@@ -85,7 +85,7 @@ class _NavButton extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 56),
             padding: const EdgeInsets.symmetric(vertical: 6),
             decoration: BoxDecoration(
-              color: selected ? Colors.white : Colors.transparent,
+              color: selected ? context.selectedBg : Colors.transparent,
               borderRadius: BorderRadius.circular(22),
             ),
             child: Column(

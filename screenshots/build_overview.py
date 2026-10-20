@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 SCREENS = sorted(Path("design/screens").glob("*.png"))
 OUT = Path("design/all_pages_overview.png")
 FLUTTER_ROOT = os.environ.get(
-    "FLUTTER_ROOT", r"C:/Users/ajayn/Downloads/flutter_windows_3.47.6-stable/flutter"
+    "FLUTTER_ROOT", r"C:/src/flutter"
 )
 FONTS = Path(FLUTTER_ROOT) / "bin/cache/artifacts/material_fonts"
 

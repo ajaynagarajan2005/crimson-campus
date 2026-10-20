@@ -28,7 +28,7 @@ class AnnouncementsScreen extends StatelessWidget {
                   success: (_) => 'All announcements marked as read',
                 ),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
+                  foregroundColor: context.accentInk,
                   minimumSize: const Size(48, 48),
                 ),
                 icon: const Icon(Icons.done_all_rounded),

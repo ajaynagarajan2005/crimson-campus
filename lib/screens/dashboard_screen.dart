@@ -7,6 +7,7 @@ import '../state/app_state.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
 import '../widgets/campus_action_card.dart';
+import '../widgets/campus_themed.dart';
 import '../widgets/campus_cards.dart';
 import '../widgets/common.dart';
 import '../widgets/glass_container.dart';
@@ -90,6 +91,8 @@ class _DashboardHeader extends StatelessWidget {
             ],
           ),
         ),
+        const ThemeToggleButton(),
+        const SizedBox(width: 10),
         ValueListenableBuilder<Set<String>>(
           valueListenable: AppState.instance.readAnnouncements,
           builder: (context, read, _) {
@@ -107,7 +110,7 @@ class _DashboardHeader extends StatelessWidget {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                    Icon(Icons.notifications_none_rounded, color: context.accentInk),
                     if (unread > 0)
                       Positioned(
                         top: -6,
@@ -116,14 +119,14 @@ class _DashboardHeader extends StatelessWidget {
                           constraints: const BoxConstraints(minWidth: 18),
                           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: context.selectedBg,
                             borderRadius: BorderRadius.circular(AppRadius.pill),
                           ),
                           child: Text(
                             '$unread',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: AppColors.primary,
+                            style: TextStyle(
+                              color: context.selectedFg,
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                             ),
@@ -393,16 +396,16 @@ class _StatTile extends StatelessWidget {
       width: width,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.10),
+        color: context.faint,
         borderRadius: BorderRadius.circular(AppRadius.tile),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        border: Border.all(color: context.hairline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: Colors.white),
+              Icon(icon, size: 18, color: context.accentInk),
               const SizedBox(width: 6),
               Expanded(child: Text(label, style: AppText.caption)),
             ],
@@ -411,7 +414,6 @@ class _StatTile extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.w800,
             ),

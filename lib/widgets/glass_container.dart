@@ -55,6 +55,7 @@ class GlassContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(borderRadius);
 
+    final light = Theme.of(context).brightness == Brightness.light;
     Widget surface = Container(
       width: width,
       height: height,
@@ -67,13 +68,21 @@ class GlassContainer extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: colors ??
-              [
-                Colors.white.withValues(alpha: tint + 0.08),
-                Colors.white.withValues(alpha: tint * 0.45),
-              ],
+              (light
+                  // Light theme: frosted white glass with a blush of red.
+                  ? [
+                      Colors.white.withValues(alpha: 0.82),
+                      Colors.white.withValues(alpha: 0.62),
+                      AppColors.tintBlush.withValues(alpha: 0.55),
+                    ]
+                  : [
+                      Colors.white.withValues(alpha: tint + 0.08),
+                      Colors.white.withValues(alpha: tint * 0.45),
+                    ]),
         ),
         border: Border.all(
-          color: borderColor ?? Colors.white.withValues(alpha: 0.30),
+          color: borderColor ??
+              (light ? AppColors.primary.withValues(alpha: 0.16) : Colors.white.withValues(alpha: 0.30)),
           width: 1.2,
         ),
       ),
@@ -86,8 +95,8 @@ class GlassContainer extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: radius,
-          splashColor: Colors.white.withValues(alpha: 0.18),
-          highlightColor: Colors.white.withValues(alpha: 0.08),
+          splashColor: (light ? AppColors.primary : Colors.white).withValues(alpha: 0.14),
+          highlightColor: (light ? AppColors.primary : Colors.white).withValues(alpha: 0.06),
           child: surface,
         ),
       );

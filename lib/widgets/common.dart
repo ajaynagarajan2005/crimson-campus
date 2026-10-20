@@ -75,7 +75,7 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 20, color: Colors.white),
+            Icon(icon, size: 20, color: context.accentInk),
             const SizedBox(width: AppSpacing.sm),
           ],
           Expanded(
@@ -85,7 +85,7 @@ class SectionHeader extends StatelessWidget {
             TextButton(
               onPressed: onAction,
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
+                foregroundColor: context.accentInk,
                 minimumSize: const Size(48, 48),
               ),
               child: Row(
@@ -108,14 +108,16 @@ class IconBubble extends StatelessWidget {
     super.key,
     required this.icon,
     this.size = 44,
-    this.background = Colors.white,
-    this.iconColor = AppColors.primary,
+    this.background,
+    this.iconColor,
   });
 
   final IconData icon;
   final double size;
-  final Color background;
-  final Color iconColor;
+
+  /// Defaults follow the theme.
+  final Color? background;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +126,7 @@ class IconBubble extends StatelessWidget {
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: background,
+        color: background ?? context.selectedBg,
         borderRadius: BorderRadius.circular(size * 0.32),
         boxShadow: [
           BoxShadow(
@@ -134,7 +136,7 @@ class IconBubble extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(icon, color: iconColor, size: size * 0.52),
+      child: Icon(icon, color: iconColor ?? context.selectedFg, size: size * 0.52),
     );
   }
 }
@@ -226,12 +228,12 @@ class GlassProgressBar extends StatelessWidget {
     super.key,
     required this.value,
     this.height = 8,
-    this.color = Colors.white,
+    this.color,
   });
 
   final double value;
   final double height;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -242,14 +244,14 @@ class GlassProgressBar extends StatelessWidget {
         height: height,
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.18),
+          color: context.isLight ? AppColors.primary.withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(height),
         ),
         child: FractionallySizedBox(
           widthFactor: clamped,
           child: Container(
             decoration: BoxDecoration(
-              color: color,
+              color: color ?? context.accentInk,
               borderRadius: BorderRadius.circular(height),
             ),
           ),
@@ -281,8 +283,8 @@ class InfoRow extends StatelessWidget {
           IconBubble(
             icon: icon,
             size: 36,
-            background: Colors.white.withValues(alpha: 0.18),
-            iconColor: Colors.white,
+            background: context.faint,
+            iconColor: context.accentInk,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -293,7 +295,6 @@ class InfoRow extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
-                    color: Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -371,7 +372,7 @@ class MetaLine extends StatelessWidget {
       padding: const EdgeInsets.only(top: 4),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: AppColors.muted),
+          Icon(icon, size: 16, color: context.inkMuted),
           const SizedBox(width: 6),
           Expanded(child: Text(text, style: AppText.caption)),
         ],
@@ -419,7 +420,7 @@ void showCampusSnack(
       duration: const Duration(seconds: 2),
       content: Row(
         children: [
-          Icon(icon, color: AppColors.primary),
+          Icon(icon, color: context.isLight ? Colors.white : AppColors.primary),
           const SizedBox(width: 12),
           Expanded(child: Text(message)),
         ],

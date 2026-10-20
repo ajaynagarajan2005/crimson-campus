@@ -5,6 +5,7 @@ import '../routes.dart';
 import '../services/browser.dart';
 import '../state/app_state.dart';
 import '../theme/app_theme.dart';
+import '../widgets/campus_themed.dart';
 import '../widgets/common.dart';
 import '../widgets/form_fields.dart';
 import '../widgets/glass_container.dart';
@@ -55,6 +56,7 @@ class ProfileScreen extends StatelessWidget {
         return GlassPage(
           title: 'Profile',
           actions: [
+            const ThemeToggleButton(),
             IconButton(
               tooltip: 'Edit profile',
               icon: const Icon(Icons.edit_rounded),
@@ -244,12 +246,12 @@ class _ToggleRow extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 56),
         child: Row(
           children: [
-            Icon(icon, color: Colors.white, size: 22),
+            Icon(icon, color: context.accentInk, size: 22),
             const SizedBox(width: 14),
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
             Switch(value: value, onChanged: onChanged),
@@ -266,7 +268,7 @@ Future<void> showEditProfileSheet(BuildContext context, Student student) {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: const Color(0xFF6E0B0B),
+    backgroundColor: context.isLight ? Colors.white : const Color(0xFF6E0B0B),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
     ),
@@ -350,7 +352,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                       height: 5,
                       margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: context.hairline,
                         borderRadius: BorderRadius.circular(AppRadius.pill),
                       ),
                     ),

@@ -34,8 +34,8 @@ class AttendanceScreen extends StatelessWidget {
                       value: overall,
                       strokeWidth: 10,
                       strokeCap: StrokeCap.round,
-                      color: Colors.white,
-                      backgroundColor: Colors.white.withValues(alpha: 0.18),
+                      color: context.accentInk,
+                      backgroundColor: context.faint,
                       semanticsLabel: 'Overall attendance',
                     ),
                     Center(
@@ -115,7 +115,7 @@ class _AttendanceTile extends StatelessWidget {
           const SizedBox(height: 10),
           GlassProgressBar(
             value: ratio,
-            color: ratio < _minimumAttendance ? AppColors.warning : Colors.white,
+            color: ratio < _minimumAttendance ? AppColors.warning : context.accentInk,
           ),
           const SizedBox(height: 8),
           Text(

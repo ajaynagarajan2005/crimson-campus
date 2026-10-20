@@ -43,56 +43,72 @@ class AppRadius {
   static const double pill = 999;
 }
 
+/// Colours that change with the light / dark theme.
+extension CampusColors on BuildContext {
+  bool get isLight => Theme.of(this).brightness == Brightness.light;
+
+  /// Main text and icon colour: dark red on white, or white on red.
+  Color get ink => Theme.of(this).colorScheme.onSurface;
+
+  /// Softer text for captions.
+  Color get inkMuted => isLight ? const Color(0xFF6E3434) : AppColors.muted;
+
+  /// Accent for icons and highlights: red on white, or white on red.
+  Color get accentInk => isLight ? AppColors.primary : Colors.white;
+
+  /// Background and foreground of a selected chip, tab or pill.
+  Color get selectedBg => isLight ? AppColors.primary : Colors.white;
+  Color get selectedFg => isLight ? Colors.white : AppColors.primary;
+
+  /// Subtle tinted fill and hairline border.
+  Color get faint => isLight ? AppColors.primary.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.12);
+  Color get hairline => isLight ? AppColors.primary.withValues(alpha: 0.22) : Colors.white.withValues(alpha: 0.35);
+}
+
 /// Tone of a [StatusBadge].
 enum BadgeTone { success, warning, danger, info, light }
 
+/// Text styles. Colours come from the active theme (dark red on white in
+/// light mode, white on red in dark mode), so they work in both.
 class AppText {
   AppText._();
 
   static const TextStyle display = TextStyle(
     fontSize: 36,
     fontWeight: FontWeight.w800,
-    color: Colors.white,
     height: 1.1,
     letterSpacing: -0.5,
   );
   static const TextStyle h1 = TextStyle(
     fontSize: 26,
     fontWeight: FontWeight.w800,
-    color: Colors.white,
     height: 1.2,
   );
   static const TextStyle h2 = TextStyle(
     fontSize: 21,
     fontWeight: FontWeight.w700,
-    color: Colors.white,
     height: 1.25,
   );
   static const TextStyle h3 = TextStyle(
     fontSize: 17,
     fontWeight: FontWeight.w700,
-    color: Colors.white,
   );
   static const TextStyle title = TextStyle(
     fontSize: 15.5,
     fontWeight: FontWeight.w700,
-    color: Colors.white,
     height: 1.3,
   );
   static const TextStyle body = TextStyle(
     fontSize: 14,
-    color: AppColors.muted,
     height: 1.45,
   );
   static const TextStyle caption = TextStyle(
     fontSize: 12.5,
-    color: AppColors.muted,
     height: 1.35,
   );
   static const TextStyle overline = TextStyle(
     fontSize: 11.5,
     fontWeight: FontWeight.w700,
-    color: AppColors.muted,
     letterSpacing: 1.2,
   );
 }

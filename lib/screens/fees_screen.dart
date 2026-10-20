@@ -59,8 +59,8 @@ class FeesScreen extends StatelessWidget {
                 IconBubble(
                   icon: fee.paid ? Icons.check_rounded : Icons.schedule_rounded,
                   size: 40,
-                  background: fee.paid ? Colors.white : AppColors.warning,
-                  iconColor: fee.paid ? AppColors.primary : const Color(0xFF5A3B00),
+                  background: fee.paid ? context.selectedBg : AppColors.warning,
+                  iconColor: fee.paid ? context.selectedFg : const Color(0xFF5A3B00),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -77,7 +77,7 @@ class FeesScreen extends StatelessWidget {
                   children: [
                     Text(
                       formatInr(fee.amount),
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
                     ),
                     const SizedBox(height: 4),
                     StatusBadge(

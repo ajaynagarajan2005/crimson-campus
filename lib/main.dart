@@ -30,15 +30,21 @@ class CrimsonCampusApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: appName,
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.theme,
-      navigatorKey: AppState.instance.navigatorKey,
-      // '/' (the landing page) is the default route; leaving initialRoute
-      // unset lets web deep links such as /#/fees open directly.
-      routes: AppRoutes.routes,
-      onGenerateRoute: AppRoutes.onGenerateRoute,
+    // The whole app follows the light / dark setting (light by default).
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppState.instance.themeMode,
+      builder: (context, mode, _) => MaterialApp(
+        title: appName,
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.theme,
+        themeMode: mode,
+        navigatorKey: AppState.instance.navigatorKey,
+        // '/' (the landing page) is the default route; leaving initialRoute
+        // unset lets web deep links such as /#/fees open directly.
+        routes: AppRoutes.routes,
+        onGenerateRoute: AppRoutes.onGenerateRoute,
+      ),
     );
   }
 }

@@ -81,7 +81,7 @@ class _DayChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : Colors.white;
+    final color = selected ? context.selectedFg : context.ink;
     return Semantics(
       selected: selected,
       button: true,
@@ -97,7 +97,7 @@ class _DayChip extends StatelessWidget {
             height: 56,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: selected ? Colors.white : Colors.transparent,
+              color: selected ? context.selectedBg : Colors.transparent,
               borderRadius: BorderRadius.circular(AppRadius.tile),
             ),
             child: Column(
@@ -151,7 +151,6 @@ class _ClassTile extends StatelessWidget {
                 Text(
                   formatTime(session.start),
                   style: const TextStyle(
-                    color: Colors.white,
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
                   ),
@@ -165,7 +164,7 @@ class _ClassTile extends StatelessWidget {
             height: 58,
             margin: const EdgeInsets.only(right: 14),
             decoration: BoxDecoration(
-              color: session.isLab ? AppColors.warning : Colors.white,
+              color: session.isLab ? AppColors.warning : context.accentInk,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -191,7 +190,7 @@ class _ClassTile extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.notifications_none_rounded, color: AppColors.muted),
+          Icon(Icons.notifications_none_rounded, color: context.inkMuted),
         ],
       ),
     );

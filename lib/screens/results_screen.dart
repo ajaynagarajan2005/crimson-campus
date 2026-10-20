@@ -29,7 +29,7 @@ class ResultsScreen extends StatelessWidget {
                 height: 96,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.selectedBg,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -44,16 +44,16 @@ class ResultsScreen extends StatelessWidget {
                   children: [
                     Text(
                       student.cgpaLabel,
-                      style: const TextStyle(
-                        color: AppColors.primary,
+                      style: TextStyle(
+                        color: context.selectedFg,
                         fontSize: 26,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const Text(
+                    Text(
                       'CGPA',
                       style: TextStyle(
-                        color: AppColors.primaryDark,
+                        color: context.selectedFg,
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                         letterSpacing: 1.2,
@@ -128,7 +128,7 @@ class _GpaBar extends StatelessWidget {
         children: [
           Text(
             gpa.toStringAsFixed(2),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13),
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
           ),
           const SizedBox(height: 6),
           Container(
@@ -140,8 +140,8 @@ class _GpaBar extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: highlight
-                    ? [Colors.white, AppColors.tintBlush]
-                    : [Colors.white.withValues(alpha: 0.55), Colors.white.withValues(alpha: 0.2)],
+                    ? (context.isLight ? const [AppColors.primary, AppColors.accent] : const [Colors.white, AppColors.tintBlush])
+                    : [context.accentInk.withValues(alpha: 0.45), context.accentInk.withValues(alpha: 0.15)],
               ),
             ),
           ),
@@ -173,13 +173,13 @@ class _ResultTile extends StatelessWidget {
             height: 48,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.selectedBg,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Text(
               result.grade,
-              style: const TextStyle(
-                color: AppColors.primary,
+              style: TextStyle(
+                color: context.selectedFg,
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
               ),
@@ -197,7 +197,7 @@ class _ResultTile extends StatelessWidget {
           ),
           Text(
             result.points.toStringAsFixed(1),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(fontWeight: FontWeight.w700),
           ),
         ],
       ),

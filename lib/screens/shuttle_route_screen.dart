@@ -89,14 +89,14 @@ class ShuttleRouteScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: i == 0 ? Colors.white : Colors.white.withValues(alpha: 0.12),
+                              color: i == 0 ? context.selectedBg : context.faint,
                               borderRadius: BorderRadius.circular(AppRadius.pill),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+                              border: Border.all(color: context.hairline),
                             ),
                             child: Text(
                               i == 0 ? 'Next · ${formatTime(departures[i])}' : formatTime(departures[i]),
                               style: TextStyle(
-                                color: i == 0 ? AppColors.primary : Colors.white,
+                                color: i == 0 ? context.selectedFg : context.ink,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -261,14 +261,14 @@ class _StopRow extends StatelessWidget {
                   height: 26,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: index == 0 ? Colors.white : AppColors.primary,
+                    color: index == 0 ? context.selectedFg : context.selectedBg,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(color: context.isLight ? AppColors.primary : Colors.white, width: 2),
                   ),
                   child: Text(
                     '${index + 1}',
                     style: TextStyle(
-                      color: index == 0 ? AppColors.primary : Colors.white,
+                      color: index == 0 ? context.selectedBg : context.selectedFg,
                       fontWeight: FontWeight.w800,
                       fontSize: 12,
                     ),
@@ -276,7 +276,7 @@ class _StopRow extends StatelessWidget {
                 ),
                 if (!isLast)
                   Expanded(
-                    child: Container(width: 3, color: Colors.white.withValues(alpha: 0.45)),
+                    child: Container(width: 3, color: context.hairline),
                   ),
               ],
             ),
@@ -294,7 +294,7 @@ class _StopRow extends StatelessWidget {
               ),
             ),
           ),
-          Icon(icon, color: Colors.white.withValues(alpha: 0.8), size: 20),
+          Icon(icon, color: context.accentInk, size: 20),
         ],
       ),
     );

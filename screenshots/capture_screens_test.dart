@@ -49,7 +49,9 @@ Widget _app(String route) => RepaintBoundary(
       key: _boundaryKey,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.theme,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.theme,
+        themeMode: AppState.instance.themeMode.value,
         navigatorKey: AppState.instance.navigatorKey,
         routes: AppRoutes.routes,
         onGenerateRoute: AppRoutes.onGenerateRoute,
@@ -222,7 +224,7 @@ void main() {
     setUp(() => _outDir = Directory('design/sections')..createSync(recursive: true));
     tearDown(() {
       _outDir = Directory('design/screens');
-      AppState.instance.themeMode.value = ThemeMode.dark;
+      AppState.instance.themeMode.value = ThemeMode.light;
     });
 
     Future<void> Function(WidgetTester) scrollToText(ThemeMode mode, String text) => (t) async {
@@ -257,7 +259,7 @@ void main() {
     setUp(() => _outDir = Directory('design/prototype')..createSync(recursive: true));
     tearDown(() {
       _outDir = Directory('design/screens');
-      AppState.instance.themeMode.value = ThemeMode.dark;
+      AppState.instance.themeMode.value = ThemeMode.light;
       aboutVariant.value = 'A';
       CampusMapScreen.showTiles = false;
     });

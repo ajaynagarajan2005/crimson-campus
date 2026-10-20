@@ -47,7 +47,6 @@ class CampusActionCard extends StatelessWidget {
                   label,
                   maxLines: 1,
                   style: const TextStyle(
-                    color: Colors.white,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                   ),
