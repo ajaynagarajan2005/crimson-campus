@@ -62,3 +62,8 @@ tools/sr_models/
 .firebase/
 firebase-debug.log
 firestore-debug.log
+
+# Desktop targets are not used (web + Android only)
+/linux/
+/macos/
+/windows/
