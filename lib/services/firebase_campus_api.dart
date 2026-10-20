@@ -292,14 +292,20 @@ class FirebaseCampusApi implements CampusApi {
           const ApiException('An account with this email or student ID already exists', statusCode: 409),
         'weak-password' => const ApiException('Use a stronger password (at least 6 characters)', statusCode: 422),
         'network-request-failed' => const ApiException("Can't reach Firebase. Check your internet connection."),
-        'operation-not-allowed' =>
-          const ApiException('Email/password sign-in is not enabled for this Firebase project yet.', statusCode: 503),
+        'operation-not-allowed' || 'configuration-not-found' || 'internal-error' => const ApiException(
+            'Sign-in is not set up yet: enable Email/Password in the Firebase console (Authentication).',
+            statusCode: 503,
+          ),
         'too-many-requests' => const ApiException('Too many attempts. Please wait a minute and try again.', statusCode: 429),
         _ => ApiException(e.message ?? 'Sign-in failed. Please try again.', statusCode: 400),
       };
     } on FirebaseException catch (e) {
       throw switch (e.code) {
         'permission-denied' => const ApiException('You do not have access to that data.', statusCode: 403),
+        'not-found' || 'failed-precondition' => const ApiException(
+            'The campus database is not set up yet: create the Firestore database in the Firebase console.',
+            statusCode: 503,
+          ),
         'unavailable' => const ApiException("Can't reach Firebase. Check your internet connection."),
         _ => ApiException(e.message ?? 'Something went wrong. Please try again.', statusCode: 500),
       };
