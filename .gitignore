@@ -57,3 +57,8 @@ backend/__pycache__/
 
 # Large model files used only by tools/enhance_images.py
 tools/sr_models/
+
+# Firebase CLI
+.firebase/
+firebase-debug.log
+firestore-debug.log

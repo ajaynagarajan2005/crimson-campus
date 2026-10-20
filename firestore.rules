@@ -1,0 +1,55 @@
+rules_version = '2';
+
+// Crimson Campus: each student can only read and change their own data.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Fields a student may change after sign-up (not their ID or email).
+    function onlyEditableFields() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'full_name', 'programme', 'semester', 'cgpa', 'credits_earned',
+        'phone', 'residence', 'photo_data', 'preferences',
+        'registered_events', 'joined_clubs', 'read_announcements',
+        'renewed_books', 'shuttle_alerts'
+      ]);
+    }
+
+    match /students/{uid} {
+      allow get: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && request.resource.data.email == request.auth.token.email;
+      allow update: if isOwner(uid) && onlyEditableFields()
+        // Photos are stored inline; keep the document well under 1 MB.
+        && (!('photo_data' in request.resource.data)
+            || request.resource.data.photo_data == null
+            || request.resource.data.photo_data.size() < 700000);
+      allow delete: if false;
+
+      match /tickets/{ticketId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && request.resource.data.message is string
+          && request.resource.data.message.size() <= 2000;
+        allow update, delete: if false;
+      }
+    }
+
+    // Maps a student ID to its account so students can log in with their ID.
+    match /studentIds/{studentId} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email;
+      allow update, delete: if false;
+    }
+  }
+}
