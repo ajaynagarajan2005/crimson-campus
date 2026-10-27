@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../state/app_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_nav_bar.dart';
+import '../widgets/nav_menu.dart';
 import 'campus_life_screen.dart';
 import 'dashboard_screen.dart';
 import 'profile_screen.dart';
@@ -27,6 +28,7 @@ class HomeShell extends StatelessWidget {
       builder: (context, index, _) => Scaffold(
         extendBody: true,
         backgroundColor: AppColors.primaryDark,
+        drawer: const NavMenuDrawer(),
         body: IndexedStack(
           index: index,
           children: const [

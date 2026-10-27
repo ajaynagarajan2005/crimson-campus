@@ -117,6 +117,11 @@ class HelpdeskTicket {
     required this.message,
     required this.status,
     required this.createdAt,
+    this.subject,
+    this.priority,
+    this.preferredDate,
+    this.contactMethod,
+    this.contactPhone,
   });
 
   factory HelpdeskTicket.fromJson(Map<String, dynamic> json) => HelpdeskTicket(
@@ -125,6 +130,11 @@ class HelpdeskTicket {
         message: json['message'] as String,
         status: json['status'] as String,
         createdAt: json['created_at'] as String,
+        subject: json['subject'] as String?,
+        priority: json['priority'] as String?,
+        preferredDate: json['preferred_date'] as String?,
+        contactMethod: json['contact_method'] as String?,
+        contactPhone: json['contact_phone'] as String?,
       );
 
   final String ticketNo;
@@ -132,6 +142,55 @@ class HelpdeskTicket {
   final String message;
   final String status;
   final String createdAt;
+
+  /// Added with the step-by-step ticket form; older tickets leave them null.
+  final String? subject;
+  final String? priority;
+
+  /// "YYYY-MM-DD" the student would like to be contacted or seen.
+  final String? preferredDate;
+  final String? contactMethod;
+  final String? contactPhone;
+
+  /// Subject if given, otherwise the first line of the message.
+  String get headline => (subject?.isNotEmpty ?? false) ? subject! : message.split('\n').first;
+}
+
+/// What the student fills in when raising a ticket.
+class TicketRequest {
+  const TicketRequest({
+    required this.category,
+    required this.message,
+    this.subject,
+    this.priority,
+    this.preferredDate,
+    this.contactMethod,
+    this.contactPhone,
+  });
+
+  final String category;
+  final String message;
+  final String? subject;
+  final String? priority;
+  final DateTime? preferredDate;
+  final String? contactMethod;
+  final String? contactPhone;
+
+  String? get preferredDateIso => preferredDate == null
+      ? null
+      : '${preferredDate!.year.toString().padLeft(4, '0')}-'
+          '${preferredDate!.month.toString().padLeft(2, '0')}-'
+          '${preferredDate!.day.toString().padLeft(2, '0')}';
+
+  Map<String, dynamic> toJson() => {
+        'category': category,
+        'message': message.trim(),
+        if (subject != null && subject!.trim().isNotEmpty) 'subject': subject!.trim(),
+        if (priority != null) 'priority': priority,
+        if (preferredDate != null) 'preferred_date': preferredDateIso,
+        if (contactMethod != null) 'contact_method': contactMethod,
+        if (contactPhone != null && contactPhone!.trim().isNotEmpty) 'contact_phone': contactPhone!.trim(),
+      };
 }
 
 /// Everything GET /api/me returns.

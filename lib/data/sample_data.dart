@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../routes.dart';
 import '../utils/format.dart';
 import 'campus_info.dart';
 import '../theme/app_theme.dart';
@@ -166,32 +165,12 @@ class CampusEvent {
   final int capacity, registered;
 }
 
-class CampusService {
-  const CampusService(this.label, this.icon, this.route, {this.badge, this.tone = BadgeTone.light});
-
-  final String label, route;
-  final IconData icon;
-  final String? badge;
-  final BadgeTone tone;
-}
-
 // ---------------------------------------------------------------------------
 // Sample data (fictional)
 // ---------------------------------------------------------------------------
 
 const String appName = 'Crimson Campus';
 const String universityName = 'INTI International University';
-
-const List<CampusService> campusServices = [
-  CampusService('Timetable', Icons.calendar_month_rounded, AppRoutes.timetable),
-  CampusService('Results', Icons.emoji_events_rounded, AppRoutes.results, badge: 'New', tone: BadgeTone.success),
-  CampusService('Attendance', Icons.fact_check_rounded, AppRoutes.attendance),
-  CampusService('Fees', Icons.account_balance_wallet_rounded, AppRoutes.fees, badge: 'Due', tone: BadgeTone.warning),
-  CampusService('Library', Icons.local_library_rounded, AppRoutes.library),
-  CampusService('Shuttle', Icons.directions_bus_rounded, AppRoutes.shuttle, badge: 'Live', tone: BadgeTone.success),
-  CampusService('Clubs', Icons.groups_rounded, AppRoutes.clubs),
-  CampusService('Helpdesk', Icons.support_agent_rounded, AppRoutes.helpdesk),
-];
 
 const List<ClassSession> timetable = [
   // Monday

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import 'nav_menu.dart';
 
 /// Red gradient backdrop with soft glowing blobs. The blobs give the
 /// frosted glass panels something to blur, which sells the glass effect.
@@ -96,7 +97,13 @@ class GlassPage extends StatelessWidget {
       extendBodyBehindAppBar: true,
       appBar: title == null
           ? null
-          : AppBar(title: Text(title!), actions: actions),
+          : AppBar(
+              // Home tabs live inside the shell that owns the menu: show ☰
+              // there instead of a back arrow.
+              leading: hasNavMenu(context) ? const NavMenuIconButton() : null,
+              title: Text(title!),
+              actions: actions,
+            ),
       body: GradientBackground(
         child: SafeArea(
           child: SingleChildScrollView(

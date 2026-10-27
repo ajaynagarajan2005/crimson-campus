@@ -26,6 +26,9 @@ def connect() -> sqlite3.Connection:
 MEDIA_DIR = Path(os.environ.get("CAMPUS_MEDIA_DIR", BASE_DIR / "media"))
 
 
+TICKET_DETAIL_COLUMNS = ("subject", "priority", "preferred_date", "contact_method", "contact_phone")
+
+
 def init_db() -> None:
     MEDIA_DIR.mkdir(parents=True, exist_ok=True)
     with connect() as conn:
@@ -34,6 +37,11 @@ def init_db() -> None:
         columns = {row["name"] for row in conn.execute("PRAGMA table_info(students)")}
         if "photo_file" not in columns:
             conn.execute("ALTER TABLE students ADD COLUMN photo_file TEXT")
+        # Migration: richer helpdesk tickets (subject, priority, preferences).
+        columns = {row["name"] for row in conn.execute("PRAGMA table_info(helpdesk_tickets)")}
+        for column in TICKET_DETAIL_COLUMNS:
+            if column not in columns:
+                conn.execute(f"ALTER TABLE helpdesk_tickets ADD COLUMN {column} TEXT")
 
 
 def hash_password(password: str, salt: str | None = None) -> tuple[str, str]:

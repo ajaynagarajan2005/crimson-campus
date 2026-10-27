@@ -211,8 +211,8 @@ class AppState {
     return path == null ? null : api.mediaUrl(path);
   }
 
-  Future<HelpdeskTicket> raiseTicket(String category, String message) async {
-    final ticket = await _authed((t) => api.createTicket(t, category, message));
+  Future<HelpdeskTicket> raiseTicket(TicketRequest request) async {
+    final ticket = await _authed((t) => api.createTicket(t, request));
     tickets.value = [ticket, ...tickets.value];
     return ticket;
   }

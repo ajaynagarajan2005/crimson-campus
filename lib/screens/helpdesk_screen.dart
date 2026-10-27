@@ -7,6 +7,8 @@ import '../theme/app_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/glass_container.dart';
 import '../widgets/glass_page.dart';
+import 'service_desk_screen.dart';
+import 'ticket_form.dart';
 import 'ticket_screens.dart';
 
 class HelpdeskScreen extends StatefulWidget {
@@ -17,44 +19,11 @@ class HelpdeskScreen extends StatefulWidget {
 }
 
 class _HelpdeskScreenState extends State<HelpdeskScreen> {
-  static const _categories = ['IT & Wi-Fi', 'Academics', 'Hostel', 'Fees', 'Other'];
   static const _faqs = [
     ('How do I reset my portal password?', 'Use "Forgot password" on the student portal. A reset link is sent to your university email within 5 minutes.'),
     ('How do I connect to campus Wi-Fi?', 'Join "SRU-Secure" and sign in with your student ID and portal password. Guests use "SRU-Guest".'),
     ('Where can I get a bonafide certificate?', 'Request it under Academics › Certificates on the portal. It is ready to collect from the Academic Office in 2 working days.'),
   ];
-
-  final _controller = TextEditingController();
-  String _category = _categories.first;
-  bool _submitting = false;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final message = _controller.text.trim();
-    if (message.length < 5) {
-      showCampusSnack(context, 'Please describe your issue (at least 5 characters)', icon: Icons.info_rounded);
-      return;
-    }
-    FocusScope.of(context).unfocus();
-    setState(() => _submitting = true);
-    final ticket = await runCampusAction<HelpdeskTicket>(
-      context,
-      () => AppState.instance.raiseTicket(_category, message),
-      success: (t) => 'Ticket ${t.ticketNo} raised under ${t.category}. We reply within 24 hours.',
-      icon: (_) => Icons.confirmation_number_rounded,
-    );
-    if (!mounted) return;
-    setState(() => _submitting = false);
-    if (ticket != null) {
-      _controller.clear();
-      Navigator.pushNamed(context, AppRoutes.ticketDetail, arguments: ticket);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,55 +70,10 @@ class _HelpdeskScreenState extends State<HelpdeskScreen> {
             ),
           ],
         ),
+        const SectionHeader(title: 'Service desks', icon: Icons.storefront_rounded),
+        const ServiceDeskGrid(),
         const SectionHeader(title: 'Raise a ticket', icon: Icons.confirmation_number_rounded),
-        GlassContainer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Category', style: AppText.caption),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final c in _categories)
-                    ChoiceChip(
-                      label: Text(c),
-                      selected: c == _category,
-                      onSelected: (_) => setState(() => _category = c),
-                      showCheckmark: false,
-                      selectedColor: context.selectedBg,
-                      backgroundColor: context.faint,
-                      side: BorderSide(color: context.hairline),
-                      labelStyle: TextStyle(
-                        color: c == _category ? context.selectedFg : context.ink,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      shape: const StadiumBorder(),
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: _controller,
-                minLines: 3,
-                maxLines: 5,
-                style: TextStyle(color: context.ink),
-                decoration: const InputDecoration(
-                  labelText: 'Describe your issue',
-                  alignLabelWithHint: true,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              PillButton(
-                label: _submitting ? 'Submitting…' : 'Submit ticket',
-                icon: Icons.send_rounded,
-                expand: true,
-                onPressed: _submitting ? null : _submit,
-              ),
-            ],
-          ),
-        ),
+        const TicketForm(),
         ValueListenableBuilder<List<HelpdeskTicket>>(
           valueListenable: AppState.instance.tickets,
           builder: (context, tickets, _) {

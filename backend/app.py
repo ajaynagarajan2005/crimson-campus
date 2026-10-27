@@ -18,7 +18,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, HTTPException, status
@@ -51,6 +51,8 @@ COLLECTIONS: dict[str, tuple[str, str]] = {
     "shuttle-alerts": ("shuttle_alerts", "route_id"),
 }
 HELPDESK_CATEGORIES = {"IT & Wi-Fi", "Academics", "Hostel", "Fees", "Other"}
+TICKET_PRIORITIES = {"Low", "Medium", "High", "Urgent"}
+CONTACT_METHODS = {"Email", "Phone", "In person"}
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -147,6 +149,11 @@ class PhotoIn(BaseModel):
 class TicketIn(BaseModel):
     category: str
     message: str = Field(min_length=5, max_length=2000)
+    subject: str | None = Field(default=None, max_length=120)
+    priority: str | None = None
+    preferred_date: date | None = None
+    contact_method: str | None = None
+    contact_phone: str | None = Field(default=None, max_length=30)
 
     @field_validator("category")
     @classmethod
@@ -154,6 +161,25 @@ class TicketIn(BaseModel):
         if v not in HELPDESK_CATEGORIES:
             raise ValueError("Unknown category")
         return v
+
+    @field_validator("priority")
+    @classmethod
+    def _priority(cls, v: str | None) -> str | None:
+        if v is not None and v not in TICKET_PRIORITIES:
+            raise ValueError("Unknown priority")
+        return v
+
+    @field_validator("contact_method")
+    @classmethod
+    def _contact_method(cls, v: str | None) -> str | None:
+        if v is not None and v not in CONTACT_METHODS:
+            raise ValueError("Unknown contact method")
+        return v
+
+    @field_validator("subject", "contact_phone")
+    @classmethod
+    def _optional_text(cls, v: str | None) -> str | None:
+        return (_clean(v) or None) if v is not None else None
 
 
 # ---------------------------------------------------------------------------
@@ -225,6 +251,11 @@ def _ticket_json(row: sqlite3.Row) -> dict:
         "ticket_no": f"HD-{1000 + row['id']}",
         "category": row["category"],
         "message": row["message"],
+        "subject": row["subject"],
+        "priority": row["priority"],
+        "preferred_date": row["preferred_date"],
+        "contact_method": row["contact_method"],
+        "contact_phone": row["contact_phone"],
         "status": row["status"],
         "created_at": row["created_at"],
     }
@@ -427,8 +458,18 @@ def list_tickets(db: Db, me: Me) -> list[dict]:
 def create_ticket(body: TicketIn, db: Db, me: Me) -> dict:
     with db:
         cur = db.execute(
-            "INSERT INTO helpdesk_tickets (student_pk, category, message) VALUES (?, ?, ?)",
-            (me["id"], body.category, body.message.strip()),
+            "INSERT INTO helpdesk_tickets (student_pk, category, message, subject, priority,"
+            " preferred_date, contact_method, contact_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                me["id"],
+                body.category,
+                body.message.strip(),
+                body.subject,
+                body.priority,
+                body.preferred_date.isoformat() if body.preferred_date else None,
+                body.contact_method,
+                body.contact_phone,
+            ),
         )
     row = db.execute("SELECT * FROM helpdesk_tickets WHERE id = ?", (cur.lastrowid,)).fetchone()
     return _ticket_json(row)

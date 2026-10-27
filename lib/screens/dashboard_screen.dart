@@ -6,12 +6,12 @@ import '../routes.dart';
 import '../state/app_state.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
-import '../widgets/campus_action_card.dart';
 import '../widgets/campus_themed.dart';
 import '../widgets/campus_cards.dart';
 import '../widgets/common.dart';
 import '../widgets/glass_container.dart';
 import '../widgets/glass_page.dart';
+import '../widgets/nav_menu.dart';
 
 /// Home dashboard: identity, profile, academic snapshot, quick access,
 /// campus update and student life.
@@ -42,8 +42,8 @@ class DashboardScreen extends StatelessWidget {
           onAction: () => Navigator.pushNamed(context, AppRoutes.results),
         ),
         _AcademicSnapshot(student: me),
-        const SectionHeader(title: 'Quick access', icon: Icons.apps_rounded),
-        const _QuickAccessGrid(),
+        const _NavigationHeader(),
+        const NavMenuGrid(),
         const _CampusMapBanner(),
         SectionHeader(
           title: 'Campus update',
@@ -80,7 +80,7 @@ class _DashboardHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const IconBubble(icon: Icons.school_rounded, size: 48),
+        const NavMenuButton(),
         const SizedBox(width: 12),
         const Expanded(
           child: Column(
@@ -437,32 +437,22 @@ class _StatTile extends StatelessWidget {
   }
 }
 
-class _QuickAccessGrid extends StatelessWidget {
-  const _QuickAccessGrid();
+/// "Navigation" title with the grid / list switch.
+class _NavigationHeader extends StatelessWidget {
+  const _NavigationHeader();
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = constraints.maxWidth < 330 ? 3 : 4;
-        const gap = 10.0;
-        final cardWidth = (constraints.maxWidth - gap * (columns - 1)) / columns;
-        return Wrap(
-          spacing: gap,
-          runSpacing: gap,
-          children: [
-            for (final service in campusServices)
-              CampusActionCard(
-                width: cardWidth,
-                icon: service.icon,
-                label: service.label,
-                badge: service.badge,
-                badgeTone: service.tone,
-                onTap: () => Navigator.pushNamed(context, service.route),
-              ),
-          ],
-        );
-      },
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.lg, bottom: AppSpacing.sm, left: AppSpacing.xs),
+      child: Row(
+        children: [
+          Icon(Icons.apps_rounded, size: 20, color: context.accentInk),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Semantics(header: true, child: const Text('Navigation', style: AppText.h3))),
+          const NavViewToggle(),
+        ],
+      ),
     );
   }
 }

@@ -9,6 +9,7 @@ import '../utils/format.dart';
 import '../widgets/common.dart';
 import '../widgets/glass_container.dart';
 import '../widgets/glass_page.dart';
+import 'ticket_form.dart';
 
 /// Icon for each helpdesk category.
 IconData ticketCategoryIcon(String category) => switch (category) {
@@ -59,10 +60,14 @@ class TicketTile extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 2),
-                Text(ticket.message, style: AppText.body, maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(ticket.headline, style: AppText.body, maxLines: 2, overflow: TextOverflow.ellipsis),
                 MetaLine(
                   icon: Icons.schedule_rounded,
-                  text: '${ticket.category} · ${raised == null ? ticket.createdAt : formatTimeAgo(raised)}',
+                  text: [
+                    ticket.category,
+                    if (ticket.priority != null) '${ticket.priority} priority',
+                    raised == null ? ticket.createdAt : formatTimeAgo(raised),
+                  ].join(' · '),
                 ),
               ],
             ),
@@ -75,11 +80,54 @@ class TicketTile extends StatelessWidget {
   }
 }
 
+/// Compact card for the grid view of the ticket history.
+class TicketGridCard extends StatelessWidget {
+  const TicketGridCard({super.key, required this.ticket});
+
+  final HelpdeskTicket ticket;
+
+  @override
+  Widget build(BuildContext context) {
+    final raised = parseUtcTimestamp(ticket.createdAt);
+    return GlassContainer(
+      height: 188,
+      borderRadius: AppRadius.tile,
+      semanticLabel: 'Ticket ${ticket.ticketNo}, ${ticket.status}. Opens details',
+      onTap: () => Navigator.pushNamed(context, AppRoutes.ticketDetail, arguments: ticket),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              IconBubble(icon: ticketCategoryIcon(ticket.category), size: 36),
+              const Spacer(),
+              StatusBadge(label: ticket.status, tone: ticketTone(ticket), dense: true),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(ticket.ticketNo, style: AppText.title),
+          Text(ticket.headline, style: AppText.body, maxLines: 2, overflow: TextOverflow.ellipsis),
+          const Spacer(),
+          Text(
+            [ticket.category, if (ticket.priority != null) ticket.priority!].join(' · '),
+            style: AppText.caption,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(raised == null ? ticket.createdAt : formatTimeAgo(raised), style: AppText.caption),
+        ],
+      ),
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // History: every ticket, with counts, filters and search.
 // ---------------------------------------------------------------------------
 
 enum _Filter { all, open, resolved }
+
+enum _View { list, grid }
 
 class TicketHistoryScreen extends StatefulWidget {
   const TicketHistoryScreen({super.key});
@@ -89,8 +137,55 @@ class TicketHistoryScreen extends StatefulWidget {
 }
 
 class _TicketHistoryScreenState extends State<TicketHistoryScreen> {
+  _View _view = _View.list;
   _Filter _filter = _Filter.all;
-  String _query = '';
+  String? _category;
+  DateTimeRange? _range;
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  bool get _hasFilters =>
+      _filter != _Filter.all || _category != null || _range != null || _search.text.trim().isNotEmpty;
+
+  void _clearFilters() {
+    _search.clear();
+    setState(() {
+      _filter = _Filter.all;
+      _category = null;
+      _range = null;
+    });
+  }
+
+  Future<void> _pickRange() async {
+    final today = DateUtils.dateOnly(DateTime.now());
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: today.subtract(const Duration(days: 365 * 2)),
+      lastDate: today,
+      initialDateRange: _range,
+      helpText: 'Tickets raised between',
+    );
+    if (picked != null) setState(() => _range = picked);
+  }
+
+  void _lastDays(int days) {
+    final today = DateUtils.dateOnly(DateTime.now());
+    setState(() => _range = DateTimeRange(start: today.subtract(Duration(days: days - 1)), end: today));
+  }
+
+  bool _inRange(HelpdeskTicket t) {
+    final range = _range;
+    if (range == null) return true;
+    final raised = parseUtcTimestamp(t.createdAt);
+    if (raised == null) return false;
+    final day = DateUtils.dateOnly(raised);
+    return !day.isBefore(range.start) && !day.isAfter(range.end);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,23 +194,43 @@ class _TicketHistoryScreenState extends State<TicketHistoryScreen> {
       builder: (context, tickets, _) {
         final open = tickets.where((t) => !ticketIsResolved(t)).length;
         final resolved = tickets.length - open;
-        final q = _query.trim().toLowerCase();
+        final q = _search.text.trim().toLowerCase();
         final shown = tickets.where((t) {
           final matchesFilter = switch (_filter) {
             _Filter.all => true,
             _Filter.open => !ticketIsResolved(t),
             _Filter.resolved => ticketIsResolved(t),
           };
+          final matchesCategory = _category == null || t.category == _category;
           final matchesQuery = q.isEmpty ||
               t.ticketNo.toLowerCase().contains(q) ||
               t.category.toLowerCase().contains(q) ||
+              (t.subject?.toLowerCase().contains(q) ?? false) ||
               t.message.toLowerCase().contains(q);
-          return matchesFilter && matchesQuery;
+          return matchesFilter && matchesCategory && matchesQuery && _inRange(t);
         }).toList();
 
         return GlassPage(
           title: 'Ticket history',
           children: [
+            // Toolbar: view switch on the left, result count and reset on the right.
+            Row(
+              children: [
+                _ViewToggle(view: _view, onChanged: (v) => setState(() => _view = v)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text('Showing ${shown.length} of ${tickets.length}', style: AppText.caption),
+                ),
+                if (_hasFilters)
+                  TextButton.icon(
+                    onPressed: _clearFilters,
+                    style: TextButton.styleFrom(foregroundColor: context.accentInk, minimumSize: const Size(48, 44)),
+                    icon: const Icon(Icons.filter_alt_off_rounded, size: 18),
+                    label: const Text('Clear'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(child: _Count(label: 'Total', value: tickets.length, icon: Icons.inbox_rounded)),
@@ -127,14 +242,66 @@ class _TicketHistoryScreenState extends State<TicketHistoryScreen> {
             ),
             const SizedBox(height: 14),
             TextField(
-              onChanged: (v) => setState(() => _query = v),
+              controller: _search,
+              onChanged: (_) => setState(() {}),
               style: TextStyle(color: context.ink),
-              decoration: const InputDecoration(
-                hintText: 'Search by ticket number, category or message',
-                prefixIcon: Icon(Icons.search_rounded),
+              decoration: InputDecoration(
+                hintText: 'Search by ticket number, subject, category or message',
+                prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: _search.text.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: 'Clear search',
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () => setState(_search.clear),
+                      ),
               ),
             ),
             const SizedBox(height: 12),
+            const Text('Date raised', style: AppText.caption),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _FilterChip(
+                  label: _range == null
+                      ? 'Select dates'
+                      : '${formatDayMonth(_range!.start)} – ${formatDayMonth(_range!.end)}',
+                  icon: Icons.date_range_rounded,
+                  selected: _range != null,
+                  onTap: _pickRange,
+                ),
+                _FilterChip(label: 'Last 7 days', selected: false, onTap: () => _lastDays(7)),
+                _FilterChip(label: 'Last 30 days', selected: false, onTap: () => _lastDays(30)),
+                if (_range != null)
+                  _FilterChip(
+                    label: 'Any date',
+                    icon: Icons.close_rounded,
+                    selected: false,
+                    onTap: () => setState(() => _range = null),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text('Category', style: AppText.caption),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final c in [null, ...ticketCategories])
+                  _FilterChip(
+                    label: c ?? 'All',
+                    icon: c == null ? null : ticketCategoryIcon(c),
+                    selected: _category == c,
+                    onTap: () => setState(() => _category = c),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text('Status', style: AppText.caption),
+            const SizedBox(height: 6),
             Wrap(
               spacing: 8,
               children: [
@@ -143,20 +310,7 @@ class _TicketHistoryScreenState extends State<TicketHistoryScreen> {
                   (_Filter.open, 'Open'),
                   (_Filter.resolved, 'Resolved'),
                 ])
-                  ChoiceChip(
-                    label: Text(label),
-                    selected: _filter == filter,
-                    onSelected: (_) => setState(() => _filter = filter),
-                    showCheckmark: false,
-                    selectedColor: context.selectedBg,
-                    backgroundColor: context.faint,
-                    side: BorderSide(color: context.hairline),
-                    labelStyle: TextStyle(
-                      color: _filter == filter ? context.selectedFg : context.ink,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    shape: const StadiumBorder(),
-                  ),
+                  _FilterChip(label: label, selected: _filter == filter, onTap: () => setState(() => _filter = filter)),
               ],
             ),
             const SizedBox(height: 14),
@@ -170,13 +324,107 @@ class _TicketHistoryScreenState extends State<TicketHistoryScreen> {
               const _EmptyState(
                 icon: Icons.search_off_rounded,
                 title: 'No matching tickets',
-                message: 'Try a different filter or search.',
+                message: 'Try a different date, category or search.',
               )
+            else if (_view == _View.list)
+              for (final ticket in shown) TicketTile(ticket: ticket)
             else
-              for (final ticket in shown) TicketTile(ticket: ticket),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  const gap = 10.0;
+                  final columns = constraints.maxWidth >= 640 ? 3 : 2;
+                  final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
+                  return Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: [
+                      for (final ticket in shown) SizedBox(width: width, child: TicketGridCard(ticket: ticket)),
+                    ],
+                  );
+                },
+              ),
           ],
         );
       },
+    );
+  }
+}
+
+/// List / grid switch shown at the top left of the history.
+class _ViewToggle extends StatelessWidget {
+  const _ViewToggle({required this.view, required this.onChanged});
+
+  final _View view;
+  final ValueChanged<_View> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget button(_View v, IconData icon, String label) {
+      final selected = view == v;
+      return Tooltip(
+        message: label,
+        child: Semantics(
+          button: true,
+          selected: selected,
+          label: label,
+          child: InkWell(
+            onTap: () => onChanged(v),
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 48,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: selected ? context.selectedBg : Colors.transparent,
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+              ),
+              child: Icon(icon, size: 22, color: selected ? context.selectedFg : context.accentInk),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: context.faint,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: Border.all(color: context.hairline),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          button(_View.list, Icons.view_list_rounded, 'List view'),
+          button(_View.grid, Icons.grid_view_rounded, 'Grid view'),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({required this.label, required this.selected, required this.onTap, this.icon});
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      avatar: icon == null ? null : Icon(icon, size: 18, color: selected ? context.selectedFg : context.accentInk),
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      showCheckmark: false,
+      selectedColor: context.selectedBg,
+      backgroundColor: context.faint,
+      side: BorderSide(color: context.hairline),
+      labelStyle: TextStyle(color: selected ? context.selectedFg : context.ink, fontWeight: FontWeight.w600),
+      shape: const StadiumBorder(),
     );
   }
 }
@@ -299,6 +547,8 @@ class TicketDetailScreen extends StatelessWidget {
                 value: raised == null ? '${t.createdAt} UTC' : '${formatLocalDateTime(raised)} (${formatTimeAgo(raised)})',
               ),
               InfoRow(icon: Icons.flag_rounded, label: 'Status', value: t.status),
+              if (t.subject != null) InfoRow(icon: Icons.title_rounded, label: 'Subject', value: t.subject!),
+              if (t.priority != null) InfoRow(icon: Icons.priority_high_rounded, label: 'Priority', value: t.priority!),
             ],
           ),
         ),
@@ -306,6 +556,25 @@ class TicketDetailScreen extends StatelessWidget {
         GlassContainer(
           child: SelectableText(t.message, style: AppText.body.copyWith(fontSize: 15, color: context.ink)),
         ),
+        if (t.preferredDate != null || t.contactMethod != null) ...[
+          const SectionHeader(title: 'Your preference', icon: Icons.tune_rounded),
+          GlassContainer(
+            child: Column(
+              children: [
+                if (parseIsoDate(t.preferredDate) case final date?)
+                  InfoRow(icon: Icons.event_available_rounded, label: 'Preferred date', value: formatDate(date)),
+                if (t.contactMethod != null)
+                  InfoRow(
+                    icon: contactMethodIcon(t.contactMethod!),
+                    label: 'Contact me by',
+                    value: t.contactMethod == 'Phone' && t.contactPhone != null
+                        ? 'Phone · ${t.contactPhone}'
+                        : t.contactMethod!,
+                  ),
+              ],
+            ),
+          ),
+        ],
         const SectionHeader(title: 'Progress', icon: Icons.timeline_rounded),
         GlassContainer(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),

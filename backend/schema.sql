@@ -87,6 +87,11 @@ CREATE TABLE IF NOT EXISTS helpdesk_tickets (
     student_pk  INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     category    TEXT    NOT NULL,
     message     TEXT    NOT NULL,
+    subject         TEXT,
+    priority        TEXT,
+    preferred_date  TEXT,
+    contact_method  TEXT,
+    contact_phone   TEXT,
     status      TEXT    NOT NULL DEFAULT 'Open',
     created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
 );

@@ -70,14 +70,13 @@ class FakeCampusApi implements CampusApi {
   }
 
   @override
-  Future<HelpdeskTicket> createTicket(String token, String category, String message) async {
-    final ticket = HelpdeskTicket(
-      ticketNo: 'HD-${1001 + tickets.length}',
-      category: category,
-      message: message,
-      status: 'Open',
-      createdAt: '2026-10-07 09:00:00',
-    );
+  Future<HelpdeskTicket> createTicket(String token, TicketRequest request) async {
+    final ticket = HelpdeskTicket.fromJson({
+      ...request.toJson(),
+      'ticket_no': 'HD-${1001 + tickets.length}',
+      'status': 'Open',
+      'created_at': DateTime.now().toUtc().toIso8601String().substring(0, 19).replaceFirst('T', ' '),
+    });
     tickets.insert(0, ticket);
     return ticket;
   }

@@ -64,6 +64,15 @@ String formatLocalDateTime(DateTime t) =>
     '${weekdayShort[t.weekday]}, ${t.day} ${_monthsShort[t.month - 1]} ${t.year} · '
     '${formatTime(TimeOfDay(hour: t.hour, minute: t.minute))}';
 
+/// "Wed, 28 Oct 2026".
+String formatDate(DateTime d) => '${weekdayShort[d.weekday]}, ${d.day} ${_monthsShort[d.month - 1]} ${d.year}';
+
+/// "28 Oct" — short form for chips and ranges.
+String formatDayMonth(DateTime d) => '${d.day} ${_monthsShort[d.month - 1]}';
+
+/// Parses a "YYYY-MM-DD" date.
+DateTime? parseIsoDate(String? value) => value == null ? null : DateTime.tryParse(value);
+
 /// "just now", "5 min ago", "3 h ago", "2 days ago" or a date.
 String formatTimeAgo(DateTime t, [DateTime? now]) {
   final diff = (now ?? DateTime.now()).difference(t);

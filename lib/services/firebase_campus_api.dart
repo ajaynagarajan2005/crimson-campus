@@ -158,26 +158,20 @@ class FirebaseCampusApi implements CampusApi {
   }
 
   @override
-  Future<HelpdeskTicket> createTicket(String token, String category, String message) async {
+  Future<HelpdeskTicket> createTicket(String token, TicketRequest request) async {
     final user = await _currentUser();
     final ticketNo = 'HD-${DateTime.now().millisecondsSinceEpoch % 1000000}';
     final now = DateTime.now().toUtc();
+    final fields = request.toJson();
     await _guard(
       () => _students.doc(user.uid).collection('tickets').add({
+        ...fields,
         'ticket_no': ticketNo,
-        'category': category,
-        'message': message.trim(),
         'status': 'Open',
         'created_at': Timestamp.fromDate(now),
       }),
     );
-    return HelpdeskTicket(
-      ticketNo: ticketNo,
-      category: category,
-      message: message.trim(),
-      status: 'Open',
-      createdAt: _formatTime(now),
-    );
+    return HelpdeskTicket.fromJson({...fields, 'ticket_no': ticketNo, 'status': 'Open', 'created_at': _formatTime(now)});
   }
 
   // -------------------------------------------------------------------------
@@ -268,13 +262,10 @@ class FirebaseCampusApi implements CampusApi {
       shuttleAlerts: _ids(d['shuttle_alerts']),
       tickets: [
         for (final t in tickets)
-          HelpdeskTicket(
-            ticketNo: t['ticket_no'] as String,
-            category: t['category'] as String,
-            message: t['message'] as String,
-            status: t['status'] as String,
-            createdAt: _formatTime((t['created_at'] as Timestamp).toDate().toUtc()),
-          ),
+          HelpdeskTicket.fromJson({
+            ...t.data(),
+            'created_at': _formatTime((t['created_at'] as Timestamp).toDate().toUtc()),
+          }),
       ],
     );
   }

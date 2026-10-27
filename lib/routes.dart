@@ -15,6 +15,7 @@ import 'screens/library_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/results_screen.dart';
+import 'screens/service_desk_screen.dart';
 import 'screens/shuttle_route_screen.dart';
 import 'screens/shuttle_screen.dart';
 import 'screens/ticket_screens.dart';
@@ -43,6 +44,7 @@ class AppRoutes {
   static const String shuttleRoute = '/shuttle/route';
   static const String ticketHistory = '/helpdesk/tickets';
   static const String ticketDetail = '/helpdesk/ticket';
+  static const String serviceDesk = '/helpdesk/desk';
 
   static Map<String, WidgetBuilder> get routes => {
         landing: (_) => const LandingScreen(),
@@ -83,6 +85,13 @@ class AppRoutes {
       return MaterialPageRoute<void>(
         settings: settings,
         builder: _requireLogin((_) => TicketDetailScreen(ticket: ticket)),
+      );
+    }
+    if (settings.name == serviceDesk) {
+      final desk = settings.arguments is ServiceDesk ? settings.arguments! as ServiceDesk : serviceDesks.first;
+      return MaterialPageRoute<void>(
+        settings: settings,
+        builder: _requireLogin((_) => ServiceDeskScreen(desk: desk)),
       );
     }
     if (settings.name == shuttleRoute) {

@@ -55,7 +55,7 @@ abstract class CampusApi {
   /// library-renewals, shuttle-alerts.
   Future<Set<String>> setItem(String token, String collection, String id, {required bool add});
   Future<Set<String>> markAllRead(String token, Iterable<String> ids);
-  Future<HelpdeskTicket> createTicket(String token, String category, String message);
+  Future<HelpdeskTicket> createTicket(String token, TicketRequest request);
 
   /// Uploads a profile photo (raw image bytes) and returns the new profile.
   Future<ProfileBundle> uploadPhoto(String token, List<int> bytes);
@@ -146,13 +146,8 @@ class HttpCampusApi implements CampusApi {
   }
 
   @override
-  Future<HelpdeskTicket> createTicket(String token, String category, String message) async =>
-      HelpdeskTicket.fromJson(
-        await _send('POST', '/api/me/tickets', token: token, body: {
-          'category': category,
-          'message': message,
-        }),
-      );
+  Future<HelpdeskTicket> createTicket(String token, TicketRequest request) async =>
+      HelpdeskTicket.fromJson(await _send('POST', '/api/me/tickets', token: token, body: request.toJson()));
 
   @override
   Future<ProfileBundle> uploadPhoto(String token, List<int> bytes) async => ProfileBundle.fromJson(

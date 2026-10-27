@@ -146,7 +146,7 @@ void main() {
       'phone': '+60 12-345 6789',
       'residence': 'INTI Residence, Block C-12',
     });
-    await state.raiseTicket('IT & Wi-Fi', 'Cannot connect to campus Wi-Fi in the library.');
+    await state.raiseTicket(const TicketRequest(category: 'IT & Wi-Fi', message: 'Cannot connect to campus Wi-Fi in the library.'));
   });
 
   Future<void> precacheLogo(WidgetTester tester) async {
@@ -219,7 +219,7 @@ void main() {
 
   shot('19_shuttle_route', AppRoutes.shuttleRoute);
   shot('20_ticket_history', AppRoutes.ticketHistory, before: (t) async {
-    await AppState.instance.raiseTicket('Hostel', 'Air conditioner in room C-12 is leaking water onto the desk.');
+    await AppState.instance.raiseTicket(const TicketRequest(category: 'Hostel', message: 'Air conditioner in room C-12 is leaking water onto the desk.'));
   });
   shot('21_ticket_detail', AppRoutes.ticketHistory, before: (t) async {
     await t.tap(find.textContaining('HD-').first);
